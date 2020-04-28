@@ -18,14 +18,10 @@ using namespace std;
 
 #include "src/hist2TKA.C"
 
-//void plot_3s9s(int run_num, int run_num2 = 0){
-void plot_3s9s(){
+void plot_3s9s(int run_num, int run_num2 = 0){
 
     gROOT->SetStyle("Plain");
     gStyle->SetOptStat(0);
-
-    int run_num = 0;
-    int run_num2 = 0;
 
     if (run_num2 < run_num){
         run_num2 = run_num;

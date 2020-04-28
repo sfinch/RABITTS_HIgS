@@ -6,7 +6,7 @@
 #include <TCanvas.h>
 #include <TRandom3.h>
 
-#include "include/processed_old.h"
+#include "include/processed_old.hh"
 
 using std::cout;
 using std::cerr;

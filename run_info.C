@@ -18,7 +18,7 @@ using namespace std;
 #include "TLine.h"
 #include "TFile.h"
 
-#include "include/MDPP16_SCP.h"
+#include "include/MDPP16_SCP.hh"
 
 
 void run_info(int run_num){
