@@ -30,7 +30,7 @@ namespace RabVar{
 
     // analysis_cycle.C
     // Divides the counting time into num_win equal cycles and saves spectra
-    const int num_win = 10;
+    const int num_win = 9;
     
     // analysis_overnight.C
     // Saves histograms every 3600 s (1 hour)
@@ -46,9 +46,9 @@ namespace RabVar{
     const int det_chn[num_det] = {0, 1, 2, 3};
 
     // Fission chambers (in SCP)
-    const int num_FC = 2;
-    const int FC_chn[num_FC] = {10, 11};
-    const int FC_threshold[num_FC] = {6000, 6000}; //in ADC channels
+    const int num_FC = 4;
+    const int FC_chn[num_FC] = {4, 5, 6, 7};
+    const int FC_threshold[num_FC] = {9000, 9000, 9000, 9000}; //in ADC channels
     const int FC_rebin = 16;
     
     // Rabbit motor signal (in SCP) 
@@ -70,9 +70,9 @@ namespace RabVar{
     // transit_time from all time_irr and time_count to compensate
     ///////////////////////////////////////////////////////////////
     double time_bin = count_time/num_win;
-    double time_irr[2] = {transit_time, irr_time+transit_time};
-    double time_count[2] = {irr_time + 2*transit_time, 
-                            irr_time + 2*transit_time + count_time};
+    double time_irr[2] = {0.0, irr_time};
+    double time_count[2] = {irr_time + transit_time, 
+                            irr_time + transit_time + count_time};
 
 }
 

@@ -24,11 +24,9 @@ void plot_cycle(int run_num){
 
     //Variables
     const int num_det = 2;
-    const int rebin = 1;
     
     //Histograms
     TH1F *hCycle = new TH1F("hCycle", "hCycle", 10*450, -10, 440);
-
 
     //get histos
     int k = run_num;

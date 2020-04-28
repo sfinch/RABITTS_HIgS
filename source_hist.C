@@ -9,6 +9,8 @@
 #include "include/processed.hh"
 //#include "include/processed_old.hh"
 
+#include "include/RabVar.hh"
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -16,12 +18,9 @@ using std::endl;
 void source_hist(int run_num){
 
     //Variables
-    //const int num_det = 2;
-    const int num_det = 4;
+    TH1F *hEnCount[RabVar::num_det];
 
-    TH1F *hEnCount[num_det];
-
-    for (int i=0; i<num_det; i++){
+    for (int i=0; i<RabVar::num_det; i++){
         hEnCount[i] = new TH1F(Form("hEn_Det%i", i), Form("hEn_Det%i", i), 40000, 0, 4000);
     }
 
@@ -41,7 +40,7 @@ void source_hist(int run_num){
             cout << '\r' << "Processing event " << jentry;
         }
 
-        for (int det=0; det<num_det; det++){
+        for (int det=0; det<RabVar::num_det; det++){
             if (rabbit.En[det]>10){
                 hEnCount[det]->Fill(rabbit.En[det]);
             }
@@ -51,11 +50,7 @@ void source_hist(int run_num){
 
     //write histos to file
     fHist->cd();
-
-        //hEnCount[0]->Write();
-        //hEnCount[2]->Write();
-    for (int det=0; det<2; det++){
-    //for (int det=0; det<num_det; det++){
+    for (int det=0; det<RabVar::num_det; det++){
         hEnCount[det]->Write();
     }
 

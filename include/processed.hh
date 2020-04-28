@@ -9,7 +9,7 @@
 #include <TChain.h>
 #include <TFile.h>
 
-#include <RabVar.hh>
+#include "RabVar.hh"
 
 // Header file for the classes stored in the TTree if any.
 
@@ -19,6 +19,7 @@ class processed {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    TFile          *file;
+   TFile          *rawfile;
 
    // Declaration of leaf types
    Float_t         En[RabVar::num_det];
@@ -55,12 +56,15 @@ processed::processed(int run_num)
    file->GetObject("processed", fChain);
     if (run_num<10){
         fChain->AddFriend("MDPP16_SCP", Form("data_root/HIgS_00%i.root", run_num));
+        rawfile = new TFile(Form("data_root/HIgS_00%i.root", run_num));
     }
     else if (run_num<100){
         fChain->AddFriend("MDPP16_SCP", Form("data_root/HIgS_0%i.root", run_num));
+        rawfile = new TFile(Form("data_root/HIgS_0%i.root", run_num));
     }
     else{
         fChain->AddFriend("MDPP16_SCP", Form("data_root/HIgS_%i.root", run_num));
+        rawfile = new TFile(Form("data_root/HIgS_%i.root", run_num));
     }
 
    Init();

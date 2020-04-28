@@ -16,20 +16,16 @@ using namespace std;
 #include "TFile.h"
 #include "TCut.h"
 
+#include "include/RabVar.hh"
+
 void plot_FC(int run_num){
 
 
     //Variables
-    const int num_det = 4;
-    int dets[num_det] = {4, 5, 6, 7};
-    //int thresh[num_det] = {8000, 8000, 8000, 8000};
-    int thresh[num_det] = {9000, 9000, 9000, 9000};
-    int rebin = 16;
-
-    TLine *lThresh[num_det]; 
+    TLine *lThresh[RabVar::num_FC]; 
 
     //Histograms
-    TH1F *hFC[num_det];
+    TH1F *hFC[RabVar::num_FC];
 
     //get histos
     TFile *fHist;
@@ -43,10 +39,8 @@ void plot_FC(int run_num){
         fHist = new TFile(Form("data_root/HIgS_%i.root", run_num));
     }
 
-    //TCanvas *cFC = new TCanvas("cFC","Summed segments",1200, 600);
-    //cFC->Divide(num_det);
     TCanvas *cFC = new TCanvas("cFC","Summed segments", 800, 1200);
-    cFC->Divide(1, num_det);
+    cFC->Divide(1, RabVar::num_FC);
 
     Double_t        seconds;
     TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -59,16 +53,16 @@ void plot_FC(int run_num){
     cout << run_num << "\t" << elapsed_time << "\t" ;
 
 
-    for (int j=0; j<num_det; j++){
-        hFC[j] = (TH1F*) (fHist->Get(Form("histos_SCP/hADC%i", dets[j])))->Clone();
+    for (int j=0; j<RabVar::num_FC; j++){
+        hFC[j] = (TH1F*) (fHist->Get(Form("histos_SCP/hADC%i", RabVar::FC_chn[j])))->Clone();
         hFC[j]->SetName(Form("run%i_Det%i", run_num, j+1));
-        hFC[j]->Rebin(rebin);
+        cout << hFC[j]->Integral(RabVar::FC_threshold[j], 65500) << "\t";
+        hFC[j]->Rebin(RabVar::FC_rebin);
         hFC[j]->GetXaxis()->SetRangeUser(2000, 65500);
-        cout << hFC[j]->Integral(thresh[j]/rebin, 65500/rebin) << "\t";
         cFC->cd(j+1);
         hFC[j]->Draw();
 
-        lThresh[j] = new TLine(thresh[j], 0, thresh[j], hFC[j]->GetMaximum());
+        lThresh[j] = new TLine(RabVar::FC_threshold[j], 0, RabVar::FC_threshold[j], hFC[j]->GetMaximum());
         lThresh[j]->SetLineColor(2);
         lThresh[j]->SetLineWidth(2);
         lThresh[j]->Draw("same");

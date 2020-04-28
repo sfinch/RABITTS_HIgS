@@ -13,12 +13,9 @@ SRCS = $(wildcard $(src_dir)/*.$(src_ext))
 DEPS = $(wildcard $(inc_dir)/*.$(inc_ext))
 OBJ = $(patsubst $(src_dir)/%.$(src_ext),$(obj_dir)/%.o,$(SRCS))
 
-all: process_rabbit overnight_rabbit
+all: process_rabbit 
 
 process_rabbit: $(OBJ) process_rabbit.cpp
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(GLIBS)
-
-overnight_rabbit: $(OBJ) overnight_rabbit.C
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(GLIBS)
 
 $(obj_dir)/%.o : $(src_dir)/%.$(src_ext) $(DEPS)
@@ -27,4 +24,4 @@ $(obj_dir)/%.o : $(src_dir)/%.$(src_ext) $(DEPS)
 .PHONY: clean
 
 clean:
-	rm -f $(obj_dir)/*.o process_rabbit overnight_rabbit
+	rm -f $(obj_dir)/*.o process_rabbit 
