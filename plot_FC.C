@@ -12,9 +12,7 @@ using namespace std;
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TLine.h"
-#include "TRandom3.h"
 #include "TFile.h"
-#include "TCut.h"
 
 #include "include/RabVar.hh"
 
