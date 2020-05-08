@@ -30,6 +30,7 @@ public :
    Bool_t          overflow[16];
    Bool_t          pileup[16];
    Double_t        seconds;
+   Int_t           time_stamp;
 
    // List of branches
    TBranch        *b_En;   //!
@@ -40,6 +41,7 @@ public :
    TBranch        *b_overflow;   //!
    TBranch        *b_pileup;   //!
    TBranch        *b_seconds;   //!
+   TBranch        *b_time_stamp;   //!
 
    processed(int run_num);
    virtual ~processed();
@@ -101,6 +103,7 @@ void processed::Init()
    fChain->SetBranchAddress("overflow[16]", overflow, &b_overflow);
    fChain->SetBranchAddress("pileup[16]", pileup, &b_pileup);
    fChain->SetBranchAddress("seconds", &seconds, &b_seconds);
+   fChain->SetBranchAddress("time_stamp", &time_stamp, &b_time_stamp);
 }
 
 void processed::Show(Long64_t entry)
