@@ -42,6 +42,7 @@ struct DT{
     TString name;
     TH1F *hTS;
     TF1 *fExpo;
+    double fit_range[2] = {400, 10000};
     
     DT(TString);
     void calc();
@@ -52,23 +53,28 @@ DT::DT(TString n){
     hTS = new TH1F(Form("hTS%s", name.Data()), Form("hTS%s", name.Data()), 
          3000000/rebin, 0, 3000000);
     fExpo = new TF1(Form("fExpo%s", name.Data()), "exp([0]+[1]*x)",
-         500, 3000000);
+         fit_range[0], 3000000);
     fExpo->SetParameter(0, 5);
     fExpo->SetParameter(1, -1e-5);
 };
 
 void DT::calc(){
     if (num_events>0){
-        hTS->GetXaxis()->SetRangeUser(500, 20000);
+        hTS->GetXaxis()->SetRangeUser(fit_range[0], fit_range[1]);
         hTS->Fit(Form("fExpo%s", name.Data()));
-        exp_int = fExpo->Eval(0)*(-1.)/(rebin*1.*fExpo->GetParameter(1));
 
+        hTS->GetXaxis()->SetRangeUser(0, fit_range[1]);
+        exp_int = fExpo->Eval(0)*(-1.)/(rebin*1.*fExpo->GetParameter(1));
         num_write = exp_int - num_events;
+
         if (num_write<0){
-            exp_int = (fExpo->Eval(500) - fExpo->Eval(0))/(rebin*1.*fExpo->GetParameter(1));
-            num_write = exp_int - hTS->Integral(0, 500/rebin);
-            cout << exp_int << endl;
-            cout << num_write << endl;
+            exp_int = (fExpo->Eval(fit_range[0]) 
+                    - fExpo->Eval(0))/(rebin*1.*fExpo->GetParameter(1));
+            num_write = exp_int - hTS->Integral(1, fit_range[0]/rebin);
+            cout << "Number events recorded:  " 
+                 << hTS->Integral(1, fit_range[0]/rebin) << endl;
+            cout << "Number events expected:  " << exp_int << endl;
+            cout << "Net events not written:  " << num_write << endl;
         }
 
         percent_PU = 100*num_PU/num_events;
@@ -176,14 +182,14 @@ void deadtime(int run_num){
         SCP[chn]->hTS->Draw();
         SCP[chn]->calc();
     }
-    for (int chn=0; chn<RabVar::num_det; chn++){
-        cDT->cd(chn+1);
-        //HPGe_count[chn]->hTS->Draw();
-        HPGe_count[chn]->calc();
-        for (int window=0; window<RabVar::num_win; window++){
-            HPGe_win[window][chn]->calc();
-        }
-    }
+    //for (int chn=0; chn<RabVar::num_det; chn++){
+    //    cDT->cd(chn+1);
+    //    //HPGe_count[chn]->hTS->Draw();
+    //    HPGe_count[chn]->calc();
+    //    for (int window=0; window<RabVar::num_win; window++){
+    //        HPGe_win[window][chn]->calc();
+    //    }
+    //}
 
 
     for (int chn=0; chn<RabVar::num_det; chn++){
@@ -223,7 +229,7 @@ void deadtime(int run_num){
         //     << SCP[chn]->num_write << "%" << endl;
         cout.precision(4);
         cout << chn << "\t" << SCP[chn]->rate << "\t";
-        cout.precision(2);
+        cout.precision(3);
         cout << SCP[chn]->percent_PU << "%\t" 
              << SCP[chn]->percent_write << "%\t"
              << SCP[chn]->percent_tot << "%" << endl;
