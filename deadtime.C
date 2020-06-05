@@ -26,6 +26,7 @@ struct DT{
 
   public:
     double rate = 0;
+    double total_events = 0;
     double num_PU = 0;
     double num_events = 0;
     double num_write = 0;
@@ -59,13 +60,13 @@ DT::DT(TString n){
 };
 
 void DT::calc(){
-    if (num_events>0){
+    if (total_events>0){
         hTS->GetXaxis()->SetRangeUser(fit_range[0], fit_range[1]);
         hTS->Fit(Form("fExpo%s", name.Data()));
 
         hTS->GetXaxis()->SetRangeUser(0, fit_range[1]);
         exp_int = fExpo->Eval(0)*(-1.)/(rebin*1.*fExpo->GetParameter(1));
-        num_write = exp_int - num_events;
+        num_write = exp_int - total_events;
 
         if (num_write<0){
             exp_int = (fExpo->Eval(fit_range[0]) 
@@ -78,13 +79,14 @@ void DT::calc(){
         }
 
         percent_PU = 100*num_PU/num_events;
-        percent_write = 100*num_write/num_events;
+        percent_write = 100*num_write/total_events;
 
         if ((percent_write>100)||(percent_write<0)){
             percent_write = 0;
             num_write = 0;
         }
-        percent_tot = 100*(num_PU+num_write)/num_events;
+        //percent_tot = 100*(num_PU+num_write)/total_events;
+        percent_tot = percent_PU+percent_write;
 
     }
 };
@@ -127,22 +129,28 @@ void deadtime(int run_num){
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
         nb = rabbit.GetEntry(jentry);   nbytes += nb;
         if (jentry%100000==0){
-            cout << '\r' << "Processing event " << jentry;
+            //cout << '\r' << "Processing event " << jentry;
         }
 
-        for (int chn=0; chn<16; chn++){
-            if (rabbit.TDC[chn] >1){
-                SCP[chn]->num_events++;
+        //for (int chn=0; chn<16; chn++){
+            //if (rabbit.TDC[chn] >1){
+        for (int chn=4; chn<8; chn++){
+            if (rabbit.ADC[chn] >3000){
+                SCP[chn]->total_events++;
                 SCP[chn]->hTS->Fill(double(rabbit.time_stamp-SCP[chn]->last_event));
 
-                if (rabbit.pileup[chn]){
-                    SCP[chn]->num_PU++;
-                }
+                //if (rabbit.ADC[chn] >3000){
+                    SCP[chn]->num_events++;
+                    if (rabbit.pileup[chn]){
+                        SCP[chn]->num_PU++;
+                    }
+                //}
 
                 SCP[chn]->last_event = rabbit.time_stamp;
             }
         }
 
+        /*
         for (int chn=0; chn<RabVar::num_det; chn++){
             if (rabbit.TDC[RabVar::det_chn[chn]] >1){
                 if ((rabbit.cycle_time>RabVar::time_count[0])
@@ -170,15 +178,18 @@ void deadtime(int run_num){
                 }
             }
         }
+        */
     }
-    cout << endl;
+    //cout << endl;
     nb = rabbit.GetEntry(nentries-1);
     elapsed_time = rabbit.seconds;
 
     TCanvas *cDT = new TCanvas("cDT", "cDT", 1000, 1000);
     cDT->Divide(4,4);
-    for (int chn=0; chn<16; chn++){
+    //for (int chn=0; chn<16; chn++){
+    for (int chn=4; chn<8; chn++){
         cDT->cd(chn+1);
+        gPad->SetLogy();
         SCP[chn]->hTS->Draw();
         SCP[chn]->calc();
     }
@@ -191,7 +202,7 @@ void deadtime(int run_num){
     //    }
     //}
 
-
+    /*
     for (int chn=0; chn<RabVar::num_det; chn++){
         cout << "-------------------------------------------------------------" << endl;
         cout << "Det " << chn << " time windows" << endl;
@@ -217,13 +228,15 @@ void deadtime(int run_num){
              << HPGe_count[chn]->percent_write << "%\t"
              << HPGe_count[chn]->percent_tot << "%" << endl;
     }
+    */
 
     cout << "-------------------------------------------------------------" << endl;
-    cout << "Total run" << endl;
+    cout << "Total run " << run_num << endl;
     cout << "-------------------------------------------------------------" << endl;
     cout << "Chn \tRate \tPileup \tWrite \tCombined " << endl;
-    for (int chn=0; chn<16; chn++){
-        SCP[chn]->rate = SCP[chn]->num_events/elapsed_time;
+    //for (int chn=0; chn<16; chn++){
+    for (int chn=4; chn<8; chn++){
+        SCP[chn]->rate = SCP[chn]->total_events/elapsed_time;
         //cout << chn << "\t" << SCP[chn]->num_events<< "\t"
         //     << SCP[chn]->num_PU << "%\t" 
         //     << SCP[chn]->num_write << "%" << endl;

@@ -37,10 +37,12 @@ void plot_FC2(int run_num){
 
     TH1F *hFC[RabVar::num_FC];
     TH1F *hFC_pu[RabVar::num_FC];
+    TH1F *hFC_rej[RabVar::num_FC];
 
     for (int fc=0; fc<RabVar::num_FC; fc++){
         hFC[fc] = new TH1F(Form("hFC%i", fc), Form("hFC%i", fc), 16*4096, 0, 16*4096);
         hFC_pu[fc] = new TH1F(Form("hFC_pu%i", fc), Form("hFC_pu%i", fc), 16*4096, 0, 16*4096);
+        hFC_rej[fc] = new TH1F(Form("hFC_rej%i", fc), Form("hFC_rej%i", fc), 16*4096, 0, 16*4096);
     }
 
     //in file
@@ -64,6 +66,9 @@ void plot_FC2(int run_num){
                 if (!(rabbit.pileup[RabVar::FC_chn[fc]])){
                     hFC_pu[fc]->Fill(rabbit.ADC[RabVar::FC_chn[fc]]);
                 }
+                else if ((rabbit.pileup[RabVar::FC_chn[fc]])){
+                    hFC_rej[fc]->Fill(rabbit.ADC[RabVar::FC_chn[fc]]);
+                }
 
             }
         }
@@ -74,27 +79,32 @@ void plot_FC2(int run_num){
     cFC->Divide(1, RabVar::num_FC);
 
     cout << "----- Run " << run_num << "-----" << endl;
-    cout << "      No PU\tPU  \tPercent PU" << endl;
+    cout << "      All counts\tPU reject\tPercent PU" << endl;
     for (int j=0; j<RabVar::num_FC; j++){
 
         counts[j] = hFC[j]->Integral(RabVar::FC_threshold[j], 65500);
         counts_PU[j] = hFC_pu[j]->Integral(RabVar::FC_threshold[j], 65500);
         percent_PU[j] = 100*(counts[j]-counts_PU[j])/counts[j];
         
-        cout << "FC" << RabVar::FC_chn[j] << ":  " 
+        cout << "FC" << RabVar::FC_chn[j] << ":\t" 
              << counts[j] << "\t"
              << counts_PU[j] << "\t"
              << percent_PU[j] << "%" << endl;
 
-        hFC[j]->Rebin(RabVar::FC_rebin);
-        hFC_pu[j]->Rebin(RabVar::FC_rebin);
+        hFC[j]->Rebin(4*RabVar::FC_rebin);
+        hFC_pu[j]->Rebin(4*RabVar::FC_rebin);
+        hFC_rej[j]->Rebin(4*RabVar::FC_rebin);
 
         hFC[j]->GetXaxis()->SetRangeUser(2000, 65500);
+        hFC[j]->GetXaxis()->SetRangeUser(100, 65500);
 
         cFC->cd(j+1);
+        gPad->SetLogy();
         hFC[j]->Draw();
         hFC_pu[j]->SetLineColor(2);
         hFC_pu[j]->Draw("same");
+        hFC_rej[j]->SetLineColor(4);
+        hFC_rej[j]->Draw("same");
 
         lThresh[j] = new TLine(RabVar::FC_threshold[j], 0, RabVar::FC_threshold[j], hFC[j]->GetMaximum());
         lThresh[j]->SetLineColor(2);
